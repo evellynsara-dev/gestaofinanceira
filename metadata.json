@@ -1,0 +1,6 @@
+{
+  "name": "Controle Financeiro Compartilhado",
+  "description": "Sistema unificado de controle financeiro para famílias e empresas compartilharem receitas, despesas, previsão de faturas e relatórios.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
