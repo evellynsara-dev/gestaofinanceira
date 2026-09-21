@@ -13,6 +13,9 @@ import {
   Volume2,
   FileSpreadsheet,
   Database,
+  CreditCard,
+  Tags,
+  Cloud,
 } from 'lucide-react';
 import { ProfileMode, DueReminder } from '../types';
 import { formatBRL, formatDateBR } from '../services/exportService';
@@ -29,6 +32,8 @@ interface HeaderProps {
   onOpenExportModal: () => void;
   onOpenBackupModal: () => void;
   onOpenMembersModal: () => void;
+  onOpenCategoriesModal: () => void;
+  onOpenAccountsModal: () => void;
   onMarkAsPaid: (transactionId: string) => void;
 }
 
@@ -48,6 +53,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenExportModal,
   onOpenBackupModal,
   onOpenMembersModal,
+  onOpenCategoriesModal,
+  onOpenAccountsModal,
   onMarkAsPaid,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -311,6 +318,39 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Cloud Sync Status Indicator */}
+            <div
+              className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold"
+              title="Todas as informações estão sincronizadas na nuvem e acessíveis de qualquer lugar usando este link"
+            >
+              <Cloud className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+              <span>Salvo no link</span>
+            </div>
+
+            {/* Categorias Button */}
+            <button
+              id="btn-categories-modal"
+              type="button"
+              onClick={onOpenCategoriesModal}
+              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+              title="Gerenciar Categorias de Despesas e Receitas"
+            >
+              <Tags className="w-3.5 h-3.5 text-blue-500" />
+              <span className="hidden md:inline">Categorias</span>
+            </button>
+
+            {/* Contas / Cartões Button */}
+            <button
+              id="btn-accounts-modal"
+              type="button"
+              onClick={onOpenAccountsModal}
+              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
+              title="Gerenciar Contas Bancárias, Cartões e Caixas"
+            >
+              <CreditCard className="w-3.5 h-3.5 text-indigo-500" />
+              <span className="hidden md:inline">Contas & Cartões</span>
+            </button>
 
             {/* Members Button */}
             <button

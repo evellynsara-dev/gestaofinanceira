@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   ProfileMode,
   Transaction,
@@ -20,6 +20,7 @@ import {
   getAccounts,
   saveAccounts,
 } from './services/storage';
+import { subscribeToProfileCloudData } from './services/firebase';
 import { calculateDueReminders, sendPushNotification } from './services/notifications';
 import { Header } from './components/Header';
 import { ConsolidatedBalancePanel } from './components/ConsolidatedBalancePanel';
@@ -33,6 +34,8 @@ import { ExportAndShareModal } from './components/ExportAndShareModal';
 import { GoogleDriveSyncModal } from './components/GoogleDriveSyncModal';
 import { BackupRestoreModal } from './components/BackupRestoreModal';
 import { MembersModal } from './components/MembersModal';
+import { CategoriesModal } from './components/CategoriesModal';
+import { AccountsModal } from './components/AccountsModal';
 import {
   GoogleDriveUser,
   GoogleDriveConfig,
@@ -76,6 +79,34 @@ export default function App() {
   const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
   const [isBackupModalOpen, setIsBackupModalOpen] = useState(false);
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
+  const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
+  const [isAccountsModalOpen, setIsAccountsModalOpen] = useState(false);
+
+  // Cloud Synchronization across devices using the same link (Firestore real-time subscription)
+  const isCloudSyncingRef = useRef(false);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToProfileCloudData(profileMode, (cloudData) => {
+      isCloudSyncingRef.current = true;
+      if (cloudData.transactions !== undefined) {
+        setTransactions(cloudData.transactions);
+      }
+      if (cloudData.budgets !== undefined) {
+        setBudgets(cloudData.budgets);
+      }
+      if (cloudData.accounts !== undefined) {
+        setAccounts(cloudData.accounts);
+      }
+      if (cloudData.members !== undefined) {
+        setMembers(cloudData.members);
+      }
+      setTimeout(() => {
+        isCloudSyncingRef.current = false;
+      }, 150);
+    });
+
+    return () => unsubscribe();
+  }, [profileMode]);
 
   // Initialize Google Auth state listener
   useEffect(() => {
@@ -354,6 +385,27 @@ export default function App() {
     setBudgets((prev) => [...prev, newBudget]);
   };
 
+  const handleAddCategoryFull = (
+    category: string,
+    monthlyLimit: number,
+    type: 'despesa' | 'receita' = 'despesa',
+    color: string = '#3b82f6'
+  ) => {
+    const newBudget: CategoryBudget = {
+      id: `cat-${Date.now()}`,
+      category,
+      monthlyLimit,
+      color,
+      icon: 'Tag',
+      type,
+    };
+    setBudgets((prev) => [...prev, newBudget]);
+  };
+
+  const handleDeleteCategory = (id: string) => {
+    setBudgets((prev) => prev.filter((b) => b.id !== id));
+  };
+
   const profileTitle = profileMode === 'familia' ? 'Controle Financeiro Familiar' : 'Finanças da Empresa';
 
   return (
@@ -377,6 +429,8 @@ export default function App() {
         onOpenExportModal={() => setIsExportModalOpen(true)}
         onOpenBackupModal={() => setIsBackupModalOpen(true)}
         onOpenMembersModal={() => setIsMembersModalOpen(true)}
+        onOpenCategoriesModal={() => setIsCategoriesModalOpen(true)}
+        onOpenAccountsModal={() => setIsAccountsModalOpen(true)}
         onMarkAsPaid={handleMarkAsPaid}
       />
 
@@ -515,6 +569,24 @@ export default function App() {
         members={members}
         profileMode={profileMode}
         onSaveMembers={setMembers}
+      />
+
+      <CategoriesModal
+        isOpen={isCategoriesModalOpen}
+        onClose={() => setIsCategoriesModalOpen(false)}
+        budgets={budgets}
+        onAddCategory={handleAddCategoryFull}
+        onUpdateBudget={handleUpdateBudget}
+        onDeleteCategory={handleDeleteCategory}
+        profileMode={profileMode}
+      />
+
+      <AccountsModal
+        isOpen={isAccountsModalOpen}
+        onClose={() => setIsAccountsModalOpen(false)}
+        accounts={accounts}
+        onSaveAccounts={setAccounts}
+        profileMode={profileMode}
       />
 
       <BackupRestoreModal

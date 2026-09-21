@@ -81,7 +81,23 @@ export const BudgetLimitsTracker: React.FC<BudgetLimitsTrackerProps> = ({
       </div>
 
       {/* Grid of Budget Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
+      {expenseBudgets.length === 0 ? (
+        <div className="mt-5 p-8 text-center bg-slate-50 border border-dashed border-slate-200 rounded-xl">
+          <Target className="w-8 h-8 text-slate-400 mx-auto mb-2 opacity-70" />
+          <p className="text-sm font-semibold text-slate-700">Nenhuma categoria de despesa cadastrada ainda</p>
+          <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
+            Cadastre suas próprias categorias de despesa e defina os tetos mensais de orçamento para acompanhar o progresso financeiro.
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowAddModal(true)}
+            className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-xs"
+          >
+            <Plus className="w-3.5 h-3.5" /> Criar Primeira Categoria
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5">
         {expenseBudgets.map((b) => {
           // Total spent: saídas + falta pagar (já comprometido no mês)
           const spent = transactions
@@ -193,7 +209,8 @@ export const BudgetLimitsTracker: React.FC<BudgetLimitsTrackerProps> = ({
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
 
       {/* Modal Add Category */}
       {showAddModal && (

@@ -117,11 +117,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           ? b.type === 'receita'
           : b.type === 'despesa'
       );
-      setCategory(filteredBudgets[0]?.category || budgets[0]?.category || 'Geral');
+      setCategory(filteredBudgets[0]?.category || budgets[0]?.category || '');
       setDate(new Date().toISOString().split('T')[0]);
       setDueDate(defaultType === 'falta_pagar' ? new Date().toISOString().split('T')[0] : '');
       setMemberId(members[0]?.id || '');
-      setAccount(defaultAccount || accounts[0]?.name || 'Conta Principal');
+      setAccount(defaultAccount || accounts[0]?.name || '');
       setNotes('');
       setFinePenaltyEstimated('');
       setInvoiceBarcode('');
@@ -179,6 +179,16 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     const rawAmount = parseFloat(amount);
     if (isNaN(rawAmount) || rawAmount <= 0) {
       alert('Por favor, informe um valor válido.');
+      return;
+    }
+
+    if (!category.trim()) {
+      alert('Por favor, cadastre ou selecione uma categoria para classificar este lançamento.');
+      return;
+    }
+
+    if (!account.trim()) {
+      alert('Por favor, cadastre ou selecione uma conta ou cartão para este lançamento.');
       return;
     }
 
@@ -573,6 +583,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
                 >
+                  {budgets.length === 0 && (
+                    <option value="">Nenhuma categoria cadastrada (clique em "Nova Categoria")</option>
+                  )}
+                  {budgets.length > 0 && !category && (
+                    <option value="">Selecione uma categoria...</option>
+                  )}
                   {relevantBudgets.length > 0
                     ? relevantBudgets.map((b) => (
                         <option key={b.id} value={b.category}>
@@ -697,24 +713,35 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   onChange={(e) => setAccount(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white font-medium"
                 >
-                  <optgroup label="Cartões de Crédito">
-                    {accounts
-                      .filter((a) => a.type === 'cartao_credito')
-                      .map((a) => (
-                        <option key={a.id} value={a.name}>
-                          💳 {a.name} {a.closingDay ? `(Fecha dia ${a.closingDay})` : ''}
-                        </option>
-                      ))}
-                  </optgroup>
-                  <optgroup label="Contas Bancárias & Carteiras">
-                    {accounts
-                      .filter((a) => a.type !== 'cartao_credito')
-                      .map((a) => (
-                        <option key={a.id} value={a.name}>
-                          🏦 {a.name}
-                        </option>
-                      ))}
-                  </optgroup>
+                  {accounts.length === 0 ? (
+                    <option value="">Nenhuma conta cadastrada (clique em "Nova Conta / Cartão")</option>
+                  ) : (
+                    <>
+                      {!account && <option value="">Selecione a conta / meio de pagamento...</option>}
+                      {accounts.filter((a) => a.type === 'cartao_credito').length > 0 && (
+                        <optgroup label="Cartões de Crédito">
+                          {accounts
+                            .filter((a) => a.type === 'cartao_credito')
+                            .map((a) => (
+                              <option key={a.id} value={a.name}>
+                                💳 {a.name} {a.closingDay ? `(Fecha dia ${a.closingDay})` : ''}
+                              </option>
+                            ))}
+                        </optgroup>
+                      )}
+                      {accounts.filter((a) => a.type !== 'cartao_credito').length > 0 && (
+                        <optgroup label="Contas Bancárias & Carteiras">
+                          {accounts
+                            .filter((a) => a.type !== 'cartao_credito')
+                            .map((a) => (
+                              <option key={a.id} value={a.name}>
+                                🏦 {a.name}
+                              </option>
+                            ))}
+                        </optgroup>
+                      )}
+                    </>
+                  )}
                 </select>
               ) : (
                 <div className="p-2.5 bg-indigo-50/70 border border-indigo-200 rounded-lg space-y-2">

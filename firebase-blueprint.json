@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "financeAppData": {
+      "title": "FinanceAppData",
+      "description": "Financial data for a workspace or profile mode",
+      "type": "object",
+      "properties": {
+        "updatedAt": { "type": "string", "description": "Timestamp of last update" },
+        "transactions": { "type": "string", "description": "JSON serialized transactions list" },
+        "categories": { "type": "string", "description": "JSON serialized categories budget list" },
+        "accounts": { "type": "string", "description": "JSON serialized payment accounts list" },
+        "members": { "type": "string", "description": "JSON serialized members list" }
+      }
+    }
+  },
+  "firestore": {
+    "/profiles/{profileId}": {
+      "schema": "financeAppData",
+      "description": "Shared finance workspace data per profile (familia and empresa)"
+    }
+  }
+}

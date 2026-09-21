@@ -1,5 +1,6 @@
 import { Member, CategoryBudget, Transaction, GoogleSheetsConfig, ProfileMode, PaymentAccount } from '../types';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { saveProfileCloudData } from './firebase';
 
 // Supabase Configuration from Vite Environment Variables
 export const SUPABASE_URL: string = (import.meta.env.VITE_SUPABASE_URL || '').trim();
@@ -766,6 +767,7 @@ CREATE POLICY "Public access accounts" ON accounts FOR ALL USING (true) WITH CHE
 export const saveTransactions = (mode: ProfileMode, transactions: Transaction[]): void => {
   const key = `${STORAGE_KEYS.TRANSACTIONS}_${mode}`;
   localStorage.setItem(key, JSON.stringify(transactions));
+  saveProfileCloudData(mode, { transactions }).catch((e) => console.warn('Cloud sync note:', e));
 };
 
 export const getMembers = (mode: ProfileMode): Member[] => {
@@ -786,6 +788,7 @@ export const getMembers = (mode: ProfileMode): Member[] => {
 export const saveMembers = (mode: ProfileMode, members: Member[]): void => {
   const key = `${STORAGE_KEYS.MEMBERS}_${mode}`;
   localStorage.setItem(key, JSON.stringify(members));
+  saveProfileCloudData(mode, { members }).catch((e) => console.warn('Cloud sync note:', e));
 };
 
 export const getBudgets = (mode: ProfileMode): CategoryBudget[] => {
@@ -806,6 +809,7 @@ export const getBudgets = (mode: ProfileMode): CategoryBudget[] => {
 export const saveBudgets = (mode: ProfileMode, budgets: CategoryBudget[]): void => {
   const key = `${STORAGE_KEYS.BUDGETS}_${mode}`;
   localStorage.setItem(key, JSON.stringify(budgets));
+  saveProfileCloudData(mode, { budgets }).catch((e) => console.warn('Cloud sync note:', e));
 };
 
 export const getAccounts = (mode: ProfileMode): PaymentAccount[] => {
@@ -826,6 +830,7 @@ export const getAccounts = (mode: ProfileMode): PaymentAccount[] => {
 export const saveAccounts = (mode: ProfileMode, accounts: PaymentAccount[]): void => {
   const key = `${STORAGE_KEYS.ACCOUNTS}_${mode}`;
   localStorage.setItem(key, JSON.stringify(accounts));
+  saveProfileCloudData(mode, { accounts }).catch((e) => console.warn('Cloud sync note:', e));
 };
 
 export const getSheetsConfig = (): GoogleSheetsConfig => {
